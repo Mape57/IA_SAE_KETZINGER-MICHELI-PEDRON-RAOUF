@@ -14,37 +14,31 @@ public class KNN extends AlgoClassification {
 	}
 
 	public int predire(Imagette img) {
-		// recuperer les imagettes
-		ArrayList<Imagette> data = new ArrayList<>(List.of(this.getDonnees().getImagettes()));
-		TreeMap<Integer, Integer> mins = new TreeMap<>();
-		for (int i = 0; i < this.k; i++) {
-			Imagette imagette = data.get(i);
-			int dist = imagette.comparer(img);
-			mins.put(dist, imagette.getLabel());
+		Set<Map.Entry<Imagette, Integer>> distances = new TreeSet<>(Comparator.comparingInt(Map.Entry::getValue));
+		for (Imagette img2 : this.getDonnees().getImagettes()) {
+			distances.add(new AbstractMap.SimpleEntry<>(img2, img.comparer(img2)));
 		}
-		// calculer les distances et en faire une liste
-		// trouver les k voisins les plus proches
-		for (int i = this.k; i < data.size(); i++) {
-			Imagette imagette = data.get(i);
-			int dist = imagette.comparer(img);
-			int max = mins.lastKey();
-			if (dist < max) {
-				mins.remove(max);
-				mins.put(dist, imagette.getLabel());
+
+		List<Integer> labels = new ArrayList<>();
+		for (Map.Entry<Imagette, Integer> entry : distances) {
+			if (labels.size() == k) {
+				break;
+			}
+			labels.add(entry.getKey().getLabel());
+		}
+
+		Map<Integer, Integer> count = new HashMap<>();
+		Integer bestLabel = null;
+		int bestCount = 0;
+		for (int label : labels) {
+			int newCount = count.getOrDefault(label, 0) + 1;
+			count.put(label, newCount);
+			if (newCount > bestCount) {
+				bestLabel = label;
+				bestCount = newCount;
 			}
 		}
-		// recuperer les labels des voisins
-		ArrayList<Integer> labels = new ArrayList<>(mins.values());
-		// savoir quel est le label le plus frequent
-		int res = labels.get(0);
-		int frequence = Collections.frequency(labels, res);
-		for (Integer label : labels) {
-			int nb = Collections.frequency(labels, label);
-			if (nb > frequence) {
-				res = label;
-				frequence = nb;
-			}
-		}
-		return res;
+
+		return bestLabel;
 	}
 }
