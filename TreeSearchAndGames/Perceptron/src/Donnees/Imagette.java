@@ -26,4 +26,5 @@ public class Imagette {
         }
         return total;
     }
+
 }

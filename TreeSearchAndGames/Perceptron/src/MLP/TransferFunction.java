@@ -5,7 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
 
-interface TransferFunction  {
+public interface TransferFunction  {
     /**
      * Function de transfert
      * @param value entrée
