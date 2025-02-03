@@ -13,6 +13,6 @@ class Neuron {
         Value = Math.random() / 10000000000000.0;
 
         for(int i = 0; i < Weights.length; i++)
-            Weights[i] = Math.random()/ Weights.length;
+            Weights[i] = Math.random() / Weights.length;
     }
 }
