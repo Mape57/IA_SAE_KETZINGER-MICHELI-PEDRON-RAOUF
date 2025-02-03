@@ -105,5 +105,16 @@ public abstract class AbstractMnkGame extends Game {
             }
         }
     }
-    
+
+    public int getCols() {
+        return cols;
+    }
+
+    public int getRows() {
+        return rows;
+    }
+
+    public int getStreak() {
+        return streak;
+    }
 }

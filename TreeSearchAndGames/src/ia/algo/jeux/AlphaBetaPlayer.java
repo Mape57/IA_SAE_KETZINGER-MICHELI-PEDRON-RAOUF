@@ -6,6 +6,9 @@ import ia.framework.jeux.Game;
 import ia.framework.jeux.GameState;
 import ia.framework.jeux.Player;
 
+import java.util.Collections;
+import java.util.List;
+
 public class AlphaBetaPlayer extends Player {
 	private int maxDepth;
 
@@ -34,22 +37,35 @@ public class AlphaBetaPlayer extends Player {
 			return new ActionValuePair(null, state.getGameValue());
 		}
 
-		ActionValuePair max = new ActionValuePair(null, Double.NEGATIVE_INFINITY);
-		for (Action coup : game.getActions(state)) {
+		double V_max = Double.NEGATIVE_INFINITY;
+		Action C_max = null;
+
+		List<Action> actions = game.getActions(state);
+		Collections.shuffle(actions);
+		ActionValuePair result = null;
+
+		for (Action c : actions) {
 			this.incStateCounter();
-			GameState s_suivant = (GameState) game.doAction(state, coup);
-			ActionValuePair result = minValue(s_suivant, alpha, beta, currentDepth + 1);
-			if (result.getValue() >= max.getValue()) {
-				max = new ActionValuePair(coup, result.getValue());
-				if (max.getValue() > alpha) {
-					alpha = max.getValue();
+			GameState S_suivant = (GameState) game.doAction(state, c);
+			result = minValue(S_suivant, alpha, beta, currentDepth + 1);
+			if (result.getValue() >= V_max) {
+				V_max = result.getValue();
+				C_max = c;
+				if (V_max > alpha) {
+					alpha = V_max;
 				}
 			}
-			if (max.getValue() >= beta) {
-				return max;
+			if (V_max >= beta) {
+				return new ActionValuePair(C_max, V_max);
 			}
 		}
-		return max;
+
+		if (C_max == null) {
+			V_max = result.getValue();
+			C_max = actions.getLast();
+		}
+
+		return new ActionValuePair(C_max, V_max);
 	}
 
 	private ActionValuePair minValue(GameState state, double alpha, double beta, int currentDepth) {
@@ -57,21 +73,36 @@ public class AlphaBetaPlayer extends Player {
 			return new ActionValuePair(null, state.getGameValue());
 		}
 
-		ActionValuePair min = new ActionValuePair(null, Double.POSITIVE_INFINITY);
-		for (Action coup : game.getActions(state)) {
+		double V_min = Double.POSITIVE_INFINITY;
+		Action C_min = null;
+
+		List<Action> actions = game.getActions(state);
+		Collections.shuffle(actions);
+		ActionValuePair result = null;
+
+		for (Action c : actions) {
 			this.incStateCounter();
-			GameState s_suivant = (GameState) game.doAction(state, coup);
-			ActionValuePair result = maxValue(s_suivant, alpha, beta, currentDepth + 1);
-			if (result.getValue() <= min.getValue()) {
-				min = new ActionValuePair(coup, result.getValue());
-				if (min.getValue() < beta) {
-					beta = min.getValue();
+			GameState S_suivant = (GameState) game.doAction(state, c);
+			result = maxValue(S_suivant, alpha, beta, currentDepth + 1);
+
+			if (result.getValue() <= V_min) {
+				V_min = result.getValue();
+				C_min = c;
+
+				if (V_min < beta) {
+					beta = V_min;
 				}
 			}
-			if (min.getValue() <= alpha) {
-				return min;
+			if (V_min <= alpha) {
+				return new ActionValuePair(C_min, V_min);
 			}
 		}
-		return min;
+
+		if (C_min == null) {
+			V_min = result.getValue();
+			C_min = actions.getLast();
+		}
+
+		return new ActionValuePair(C_min, V_min);
 	}
 }

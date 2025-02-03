@@ -6,6 +6,9 @@ import ia.framework.jeux.Game;
 import ia.framework.jeux.GameState;
 import ia.framework.jeux.Player;
 
+import java.util.Collections;
+import java.util.List;
+
 public class MinMaxPlayer extends Player {
 	private int maxDepth;
 
@@ -34,15 +37,29 @@ public class MinMaxPlayer extends Player {
 			return new ActionValuePair(null, state.getGameValue());
 		}
 
-		ActionValuePair best = new ActionValuePair(null, Double.NEGATIVE_INFINITY);
-		for (Action action : game.getActions(state)) {
+		double V_max = -Double.MAX_VALUE;
+		Action C_max = null;
+
+		List<Action> actions = game.getActions(state);
+		Collections.shuffle(actions);
+		ActionValuePair result = null;
+
+		for (Action c : actions) {
 			this.incStateCounter();
-			ActionValuePair result = minValue((GameState) game.doAction(state, action), currentDepth + 1);
-			if (result.getValue() >= best.getValue()) {
-				best = new ActionValuePair(action, result.getValue());
+			GameState S_suivant = (GameState) game.doAction(state, c);
+			result = minValue(S_suivant, currentDepth + 1);
+			if (result.getValue() >= V_max) {
+				V_max = result.getValue();
+				C_max = c;
 			}
 		}
-		return best;
+
+		if (C_max == null) {
+			V_max = result.getValue();
+			C_max = actions.getLast();
+		}
+
+		return new ActionValuePair(C_max, V_max);
 	}
 
 	private ActionValuePair minValue(GameState state, int currentDepth) {
@@ -50,14 +67,29 @@ public class MinMaxPlayer extends Player {
 			return new ActionValuePair(null, state.getGameValue());
 		}
 
-		ActionValuePair best = new ActionValuePair(null, Double.POSITIVE_INFINITY);
-		for (Action action : game.getActions(state)) {
+		double V_min = Double.MAX_VALUE;
+		Action C_min = null;
+
+		List<Action> actions = game.getActions(state);
+		Collections.shuffle(actions);
+		ActionValuePair result = null;
+
+		for (Action c : actions) {
 			this.incStateCounter();
-			ActionValuePair result = maxValue((GameState) game.doAction(state, action), currentDepth + 1);
-			if (result.getValue() <= best.getValue()) {
-				best = new ActionValuePair(action, result.getValue());
+			GameState S_suivant = (GameState) game.doAction(state, c);
+			result = maxValue(S_suivant, currentDepth + 1);
+
+			if (result.getValue() <= V_min) {
+				V_min = result.getValue();
+				C_min = c;
 			}
 		}
-		return best;
+
+		if (C_min == null) {
+			V_min = result.getValue();
+			C_min = actions.getLast();
+		}
+
+		return new ActionValuePair(C_min, V_min);
 	}
 }
